@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Velur — Scent Diffusion Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0c09;--moss:#3e3c29;--cacao:#47301e;--stone:#6b241e;
+  --caramel:#ac7b44;--earth:#A59C76;--rose:#d7b6a6;--ivory:#F5F0E8;
+  --green:#4a7c59;--red:#8b3a3a;
+}
+html,body{background:var(--bg);color:var(--rose);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px 80px}
+
+/* HERO */
+.hero{padding:48px 0 32px;text-align:center;border-bottom:1px solid rgba(172,123,68,.2);margin-bottom:32px}
+.hero-mark{font-family:'Cormorant Garamond',Georgia,serif;font-size:42px;letter-spacing:6px;color:var(--ivory);font-weight:500;margin-bottom:4px}
+.hero-sub{font-size:10px;letter-spacing:3px;color:var(--caramel);text-transform:uppercase;margin-bottom:20px}
+.hero-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;color:var(--rose);font-weight:400;margin-bottom:8px}
+.hero-desc{font-size:13px;color:var(--earth);max-width:480px;margin:0 auto;line-height:1.7}
+
+/* SECTION */
+.section{margin-bottom:36px}
+.section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid rgba(172,123,68,.18)}
+.section-num{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;color:var(--caramel);font-weight:500;line-height:1}
+.section-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;color:var(--ivory);font-weight:500}
+
+/* META FIELDS */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
+.meta-grid .full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--earth);text-transform:uppercase}
+.field input,.field textarea{background:var(--moss);border:1px solid rgba(172,123,68,.25);border-radius:5px;padding:10px 12px;font-size:13px;color:var(--rose);font-family:inherit}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--caramel)}
+.field textarea{min-height:70px;resize:vertical}
+
+/* RATING ROW */
+.q{margin-bottom:22px}
+.q-text{font-size:13px;color:var(--rose);margin-bottom:10px;line-height:1.5}
+.q-text .req{color:#c47474;margin-left:2px}
+.scale{display:flex;gap:5px;flex-wrap:wrap}
+.scale-btn{
+  flex:1;min-width:30px;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--moss);border:1px solid rgba(172,123,68,.25);border-radius:5px;
+  color:var(--earth);font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .12s;user-select:none;
+}
+.scale-btn:hover{border-color:var(--caramel);color:var(--rose)}
+.scale-btn.sel{background:var(--caramel);border-color:var(--caramel);color:#1a1208;font-weight:700}
+.scale-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:9px;color:var(--earth);letter-spacing:.3px}
+
+/* MULTI-CHOICE */
+.choices{display:flex;flex-direction:column;gap:7px}
+.choice{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;background:var(--moss);border:1px solid rgba(172,123,68,.2);border-radius:5px;
+  cursor:pointer;transition:border-color .12s;
+}
+.choice:hover{border-color:rgba(172,123,68,.5)}
+.choice.sel{border-color:var(--caramel);background:rgba(172,123,68,.12)}
+.choice-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--earth);flex-shrink:0;position:relative}
+.choice.sel .choice-dot{border-color:var(--caramel)}
+.choice.sel .choice-dot::after{content:'';position:absolute;inset:2.5px;border-radius:50%;background:var(--caramel)}
+.choice-text{font-size:12.5px;color:var(--rose)}
+
+/* COMMENT BLOCK */
+.comment-field{margin-top:18px}
+.comment-field label{display:block;font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--earth);text-transform:uppercase;margin-bottom:6px}
+.comment-field textarea{width:100%;background:var(--moss);border:1px solid rgba(172,123,68,.25);border-radius:5px;padding:10px 12px;font-size:13px;color:var(--rose);font-family:inherit;min-height:70px;resize:vertical}
+.comment-field textarea:focus{outline:none;border-color:var(--caramel)}
+
+/* SUBMIT */
+.submit-row{margin-top:40px;text-align:center}
+.submit-btn{
+  background:var(--caramel);color:#1a1208;border:none;border-radius:6px;
+  padding:14px 48px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:transform .12s,box-shadow .12s;
+}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(172,123,68,.3)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.err-msg{margin-top:14px;font-size:12px;color:#c47474}
+
+/* THANK YOU SCREEN */
+.thanks{display:none;text-align:center;padding:90px 20px}
+.thanks-mark{font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;letter-spacing:4px;color:var(--ivory);margin-bottom:18px}
+.thanks-icon{font-size:40px;margin-bottom:18px}
+.thanks-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;color:var(--caramel);margin-bottom:10px}
+.thanks-desc{font-size:13px;color:var(--earth);max-width:380px;margin:0 auto}
+
+@media (max-width:480px){
+  .meta-grid{grid-template-columns:1fr}
+  .hero-mark{font-size:32px;letter-spacing:4px}
+  .scale-btn{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="form-wrap">
+  <div class="hero">
+    <div class="hero-mark">VELUR</div>
+    <div class="hero-sub">Home Fragrances</div>
+    <div class="hero-title">Scent Diffusion Feedback</div>
+    <p class="hero-desc">Your honest impressions help us calibrate scent strength and coverage across our diffuser range. Please rate each product on a scale of 1 (very weak / not noticeable) to 10 (very strong / very noticeable).</p>
+  </div>
+
+  <form id="survey-form">
+
+    <!-- RESPONDENT INFO -->
+    <div class="section">
+      <div class="meta-grid">
+        <div class="field"><label>Name</label><input type="text" id="respondent_name" placeholder="Your name"/></div>
+        <div class="field"><label>Date</label><input type="date" id="response_date"/></div>
+        <div class="field full"><label>Area / Office</label><input type="text" id="area_office" placeholder="e.g. 4th Floor Reception, Dubai Office"/></div>
+      </div>
+    </div>
+
+    <!-- SECTION 1: ELECTRIC DIFFUSER -->
+    <div class="section">
+      <div class="section-head"><span class="section-num">01</span><span class="section-title">Electric Diffuser Feedback</span></div>
+
+      <div class="q" data-field="ed_noticeable">
+        <div class="q-text">How noticeable is the scent when you first enter the office?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not noticeable</span><span>Very noticeable</span></div>
+      </div>
+      <div class="q" data-field="ed_spread">
+        <div class="q-text">How well does the scent spread throughout the office?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Doesn't spread</span><span>Spreads fully</span></div>
+      </div>
+      <div class="q" data-field="ed_inner_reach">
+        <div class="q-text">Does the scent reach the inner areas of the office?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Doesn't reach</span><span>Reaches fully</span></div>
+      </div>
+      <div class="q" data-field="ed_consistency">
+        <div class="q-text">How consistent is the scent during the day?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Very inconsistent</span><span>Very consistent</span></div>
+      </div>
+      <div class="q" data-field="ed_coverage">
+        <div class="q-text">Do you feel the diffuser is covering the full office area?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not at all</span><span>Completely</span></div>
+      </div>
+      <div class="q" data-field="ed_satisfaction">
+        <div class="q-text">Overall, how satisfied are you with the electric diffuser scent diffusion?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not satisfied</span><span>Very satisfied</span></div>
+      </div>
+      <div class="comment-field">
+        <label>Comment</label>
+        <textarea id="ed_comment" placeholder="Any additional thoughts on the electric diffuser..."></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 2: SMALL REED DIFFUSER -->
+    <div class="section">
+      <div class="section-head"><span class="section-num">02</span><span class="section-title">Small Reed Diffuser Feedback</span></div>
+
+      <div class="q" data-field="srd_noticeable">
+        <div class="q-text">How noticeable is the scent from the small reed diffuser?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not noticeable</span><span>Very noticeable</span></div>
+      </div>
+      <div class="q" data-field="srd_spread">
+        <div class="q-text">How well does the small reed diffuser spread the scent in the area?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Doesn't spread</span><span>Spreads fully</span></div>
+      </div>
+      <div class="q" data-field="srd_strength_fit">
+        <div class="q-text">Is the scent strength suitable for a small space?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not suitable</span><span>Very suitable</span></div>
+      </div>
+      <div class="q" data-field="srd_persistence">
+        <div class="q-text">Does the scent stay in the area or fade quickly?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Fades quickly</span><span>Stays well</span></div>
+      </div>
+      <div class="q" data-field="srd_satisfaction">
+        <div class="q-text">Overall, how satisfied are you with the small reed diffuser performance?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not satisfied</span><span>Very satisfied</span></div>
+      </div>
+      <div class="comment-field">
+        <label>Comment</label>
+        <textarea id="srd_comment" placeholder="Any additional thoughts on the small reed diffuser..."></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 3: BIG REED DIFFUSER -->
+    <div class="section">
+      <div class="section-head"><span class="section-num">03</span><span class="section-title">Big Reed Diffuser Feedback</span></div>
+
+      <div class="q" data-field="brd_noticeable">
+        <div class="q-text">How noticeable is the scent from the big reed diffuser?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not noticeable</span><span>Very noticeable</span></div>
+      </div>
+      <div class="q" data-field="brd_spread">
+        <div class="q-text">How well does the big reed diffuser spread the scent in the area?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Doesn't spread</span><span>Spreads fully</span></div>
+      </div>
+      <div class="q" data-field="brd_coverage">
+        <div class="q-text">Does the big reed diffuser cover a larger space properly?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not at all</span><span>Completely</span></div>
+      </div>
+      <div class="q" data-field="brd_strength_fit">
+        <div class="q-text">Is the scent strength suitable, or is it too strong?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Too strong</span><span>Just right</span></div>
+      </div>
+      <div class="q" data-field="brd_satisfaction">
+        <div class="q-text">Overall, how satisfied are you with the big reed diffuser performance?</div>
+        <div class="scale"></div>
+        <div class="scale-labels"><span>Not satisfied</span><span>Very satisfied</span></div>
+      </div>
+      <div class="comment-field">
+        <label>Comment</label>
+        <textarea id="brd_comment" placeholder="Any additional thoughts on the big reed diffuser..."></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 4: GENERAL FEEDBACK -->
+    <div class="section">
+      <div class="section-head"><span class="section-num">04</span><span class="section-title">General Feedback</span></div>
+
+      <div class="q">
+        <div class="q-text">Which product gives the best scent diffusion?</div>
+        <div class="choices" id="best_product">
+          <div class="choice" data-value="Electric Diffuser"><div class="choice-dot"></div><div class="choice-text">Electric Diffuser</div></div>
+          <div class="choice" data-value="Small Reed Diffuser"><div class="choice-dot"></div><div class="choice-text">Small Reed Diffuser</div></div>
+          <div class="choice" data-value="Big Reed Diffuser"><div class="choice-dot"></div><div class="choice-text">Big Reed Diffuser</div></div>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="q-text">Which product needs improvement?</div>
+        <div class="choices" id="needs_improvement">
+          <div class="choice" data-value="Electric Diffuser"><div class="choice-dot"></div><div class="choice-text">Electric Diffuser</div></div>
+          <div class="choice" data-value="Small Reed Diffuser"><div class="choice-dot"></div><div class="choice-text">Small Reed Diffuser</div></div>
+          <div class="choice" data-value="Big Reed Diffuser"><div class="choice-dot"></div><div class="choice-text">Big Reed Diffuser</div></div>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="q-text">What is your main observation?</div>
+        <div class="choices" id="main_observation">
+          <div class="choice" data-value="Scent is only noticeable at the entrance"><div class="choice-dot"></div><div class="choice-text">Scent is only noticeable at the entrance</div></div>
+          <div class="choice" data-value="Scent does not reach inside the office"><div class="choice-dot"></div><div class="choice-text">Scent does not reach inside the office</div></div>
+          <div class="choice" data-value="Scent fades quickly"><div class="choice-dot"></div><div class="choice-text">Scent fades quickly</div></div>
+          <div class="choice" data-value="Scent is suitable"><div class="choice-dot"></div><div class="choice-text">Scent is suitable</div></div>
+          <div class="choice" data-value="Scent is too strong"><div class="choice-dot"></div><div class="choice-text">Scent is too strong</div></div>
+          <div class="choice" data-value="Scent is too weak"><div class="choice-dot"></div><div class="choice-text">Scent is too weak</div></div>
+        </div>
+      </div>
+
+      <div class="comment-field">
+        <label>Additional Notes</label>
+        <textarea id="additional_notes" placeholder="Anything else you'd like us to know..."></textarea>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button type="submit" class="submit-btn" id="submit-btn">Submit Feedback</button>
+      <div class="err-msg" id="err-msg"></div>
+    </div>
+  </form>
+</div>
+
+<div class="thanks" id="thanks-wrap">
+  <div class="thanks-mark">VELUR</div>
+  <div class="thanks-icon">&#10003;</div>
+  <div class="thanks-title">Thank you</div>
+  <p class="thanks-desc">Your feedback has been recorded. We appreciate you taking the time to help us improve the Velur scent experience.</p>
+</div>
+
+<script>
+// Build 1-10 rating buttons for every .q element
+document.querySelectorAll('.q').forEach(function(q){
+  var field = q.getAttribute('data-field');
+  if(!field) return;
+  var scale = q.querySelector('.scale');
+  for(var i=1;i<=10;i++){
+    var btn = document.createElement('div');
+    btn.className = 'scale-btn';
+    btn.textContent = i;
+    btn.setAttribute('data-val', i);
+    btn.addEventListener('click', function(){
+      var val = this.getAttribute('data-val');
+      var parent = this.parentElement;
+      parent.querySelectorAll('.scale-btn').forEach(function(b){ b.classList.remove('sel'); });
+      this.classList.add('sel');
+      parent.closest('.q').setAttribute('data-selected', val);
+    });
+    scale.appendChild(btn);
+  }
+});
+
+// Single-select choice groups
+document.querySelectorAll('.choices').forEach(function(group){
+  group.querySelectorAll('.choice').forEach(function(c){
+    c.addEventListener('click', function(){
+      group.querySelectorAll('.choice').forEach(function(x){ x.classList.remove('sel'); });
+      this.classList.add('sel');
+    });
+  });
+});
+
+document.getElementById('survey-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var btn = document.getElementById('submit-btn');
+  var err = document.getElementById('err-msg');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  var data = {
+    respondent_name: document.getElementById('respondent_name').value,
+    response_date: document.getElementById('response_date').value,
+    area_office: document.getElementById('area_office').value,
+    ed_comment: document.getElementById('ed_comment').value,
+    srd_comment: document.getElementById('srd_comment').value,
+    brd_comment: document.getElementById('brd_comment').value,
+    additional_notes: document.getElementById('additional_notes').value
+  };
+
+  document.querySelectorAll('.q[data-field]').forEach(function(q){
+    data[q.getAttribute('data-field')] = q.getAttribute('data-selected') || '';
+  });
+
+  ['best_product','needs_improvement','main_observation'].forEach(function(id){
+    var sel = document.querySelector('#'+id+' .choice.sel');
+    data[id] = sel ? sel.getAttribute('data-value') : '';
+  });
+
+  try{
+    var res = await fetch('/api/responses', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    if(!res.ok){
+      var e2 = await res.json().catch(function(){return {};});
+      err.textContent = e2.error || 'Something went wrong. Please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Submit Feedback';
+      return;
+    }
+    document.getElementById('form-wrap').style.display = 'none';
+    document.getElementById('thanks-wrap').style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }catch(err2){
+    err.textContent = 'Network error. Please check your connection and try again.';
+    btn.disabled = false;
+    btn.textContent = 'Submit Feedback';
+  }
+});
+</script>
+</body>
+</html>
