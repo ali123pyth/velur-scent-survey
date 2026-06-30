@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Velur Scent Survey — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0c09;--moss:#3e3c29;--cacao:#47301e;
+  --caramel:#ac7b44;--earth:#A59C76;--rose:#d7b6a6;--ivory:#F5F0E8;
+  --green:#4a7c59;--red:#8b3a3a;
+}
+html,body{background:var(--bg);color:var(--rose);font-family:'Inter',sans-serif;font-size:13px}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{width:100%;max-width:340px;background:var(--cacao);border:1px solid rgba(172,123,68,.25);border-radius:10px;padding:36px 32px;text-align:center}
+.login-mark{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;letter-spacing:4px;color:var(--ivory);margin-bottom:4px}
+.login-sub{font-size:9px;letter-spacing:2.5px;color:var(--caramel);text-transform:uppercase;margin-bottom:24px}
+.login-box input{width:100%;background:var(--moss);border:1px solid rgba(172,123,68,.25);border-radius:5px;padding:11px 14px;font-size:13px;color:var(--rose);margin-bottom:12px;font-family:inherit}
+.login-box input:focus{outline:none;border-color:var(--caramel)}
+.login-box button{width:100%;background:var(--caramel);color:#1a1208;border:none;border-radius:5px;padding:11px;font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer}
+.login-err{font-size:11px;color:#c47474;margin-top:10px;min-height:14px}
+
+/* DASHBOARD */
+#dash{display:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid rgba(172,123,68,.2);background:var(--cacao)}
+.tb-left{display:flex;align-items:center;gap:14px}
+.tb-mark{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;letter-spacing:2px;color:var(--ivory)}
+.tb-sub{font-size:10px;color:var(--earth);letter-spacing:1px;text-transform:uppercase}
+.tb-actions{display:flex;gap:8px}
+.tb-btn{background:transparent;border:1px solid rgba(172,123,68,.35);color:var(--rose);border-radius:5px;padding:8px 16px;font-size:11px;cursor:pointer;font-family:inherit}
+.tb-btn:hover{border-color:var(--caramel)}
+.tb-btn.primary{background:var(--caramel);color:#1a1208;border-color:var(--caramel);font-weight:600}
+
+.content{max-width:1100px;margin:0 auto;padding:28px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--cacao);border:1px solid rgba(172,123,68,.18);border-radius:8px;padding:18px 20px}
+.stat-num{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;color:var(--caramel);font-weight:500}
+.stat-label{font-size:10px;color:var(--earth);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+
+.section-h{font-size:11px;font-weight:700;color:var(--earth);letter-spacing:2px;text-transform:uppercase;margin:24px 0 14px;padding-bottom:8px;border-bottom:1px solid rgba(172,123,68,.15)}
+
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px}
+.product-card{background:var(--cacao);border:1px solid rgba(172,123,68,.18);border-radius:8px;padding:18px}
+.product-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:var(--ivory);margin-bottom:14px}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(62,60,41,.6);font-size:11.5px}
+.metric-row:last-child{border-bottom:none}
+.metric-label{color:var(--earth)}
+.metric-bar-wrap{display:flex;align-items:center;gap:8px;width:120px}
+.metric-bar{flex:1;height:5px;background:rgba(172,123,68,.15);border-radius:3px;overflow:hidden}
+.metric-bar-fill{height:100%;background:var(--caramel);border-radius:3px}
+.metric-val{font-weight:700;color:var(--rose);width:28px;text-align:right}
+
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.choice-card{background:var(--cacao);border:1px solid rgba(172,123,68,.18);border-radius:8px;padding:16px}
+.choice-card h4{font-size:11px;font-weight:700;color:var(--caramel);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.choice-bar-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:11.5px;gap:8px}
+.choice-bar-label{color:var(--rose);flex:1}
+.choice-bar-count{color:var(--earth);font-weight:600}
+
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th{text-align:left;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--earth);padding:8px 10px;border-bottom:1px solid rgba(172,123,68,.2);white-space:nowrap}
+td{padding:8px 10px;font-size:11.5px;color:var(--rose);border-bottom:1px solid rgba(62,60,41,.4);white-space:nowrap}
+.table-wrap{overflow-x:auto;background:var(--cacao);border:1px solid rgba(172,123,68,.18);border-radius:8px}
+
+.empty{text-align:center;padding:60px 20px;color:var(--earth);font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-mark">VELUR</div>
+    <div class="login-sub">Survey Admin</div>
+    <input type="password" id="pw" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<div id="dash">
+  <div class="topbar">
+    <div class="tb-left">
+      <div>
+        <div class="tb-mark">VELUR</div>
+        <div class="tb-sub">Scent Diffusion Survey — Admin</div>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <button class="tb-btn" onclick="exportCsv()">&#11015; Export CSV</button>
+      <button class="tb-btn primary" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="empty">Loading...</div>
+  </div>
+</div>
+
+<script>
+async function checkAuth(){
+  var r = await fetch('/api/admin/me');
+  var d = await r.json();
+  if(d.isAdmin){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('dash').style.display='block';
+    loadDashboard();
+  }
+}
+
+async function doLogin(){
+  var pw = document.getElementById('pw').value;
+  var err = document.getElementById('login-err');
+  err.textContent='';
+  try{
+    var r = await fetch('/api/admin/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({password: pw})
+    });
+    if(!r.ok){ err.textContent='Incorrect password.'; return; }
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('dash').style.display='block';
+    loadDashboard();
+  }catch(e){ err.textContent='Network error.'; }
+}
+
+async function doLogout(){
+  await fetch('/api/admin/logout', {method:'POST'});
+  location.reload();
+}
+
+function exportCsv(){
+  window.open('/api/admin/export-csv', '_blank');
+}
+
+var RATING_LABELS = {
+  ed_noticeable:'Noticeable on entry', ed_spread:'Spreads through office', ed_inner_reach:'Reaches inner areas',
+  ed_consistency:'Consistent during day', ed_coverage:'Covers full area', ed_satisfaction:'Overall satisfaction',
+  srd_noticeable:'Noticeable', srd_spread:'Spreads in area', srd_strength_fit:'Strength suitable for space',
+  srd_persistence:'Stays / doesn\\'t fade', srd_satisfaction:'Overall satisfaction',
+  brd_noticeable:'Noticeable', brd_spread:'Spreads in area', brd_coverage:'Covers larger space',
+  brd_strength_fit:'Strength suitable', brd_satisfaction:'Overall satisfaction'
+};
+
+async function loadDashboard(){
+  var content = document.getElementById('content');
+  try{
+    var [sumRes, dataRes] = await Promise.all([
+      fetch('/api/admin/summary'),
+      fetch('/api/admin/responses')
+    ]);
+    var summary = await sumRes.json();
+    var responses = await dataRes.json();
+
+    if(!summary.total){
+      content.innerHTML = '<div class="empty">No responses yet. Share the survey link to start collecting feedback.</div>';
+      return;
+    }
+
+    var avg = summary.averages;
+
+    function productCard(title, fields){
+      var rows = fields.map(function(f){
+        var val = parseFloat(avg[f+'_avg']) || 0;
+        var pct = (val/10)*100;
+        return '<div class="metric-row"><span class="metric-label">'+RATING_LABELS[f]+'</span>'
+          +'<div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" style="width:'+pct+'%"></div></div>'
+          +'<span class="metric-val">'+(val?val.toFixed(1):'—')+'</span></div></div>';
+      }).join('');
+      return '<div class="product-card"><div class="product-title">'+title+'</div>'+rows+'</div>';
+    }
+
+    function choiceCard(title, rows){
+      if(!rows || !rows.length) return '<div class="choice-card"><h4>'+title+'</h4><div style="color:var(--earth);font-size:11px">No data yet</div></div>';
+      var total = rows.reduce(function(s,r){return s+parseInt(r.count,10);},0);
+      var html = rows.map(function(r){
+        var label = r[Object.keys(r)[0]];
+        var count = r.count;
+        var pct = total ? Math.round((count/total)*100) : 0;
+        return '<div class="choice-bar-row"><span class="choice-bar-label">'+label+'</span><span class="choice-bar-count">'+count+' ('+pct+'%)</span></div>';
+      }).join('');
+      return '<div class="choice-card"><h4>'+title+'</h4>'+html+'</div>';
+    }
+
+    var tableRows = responses.slice(0,100).map(function(r){
+      return '<tr>'
+        +'<td>'+(r.created_at?new Date(r.created_at).toLocaleDateString('en-GB'):'—')+'</td>'
+        +'<td>'+(r.respondent_name||'—')+'</td>'
+        +'<td>'+(r.area_office||'—')+'</td>'
+        +'<td>'+(r.ed_satisfaction!=null?r.ed_satisfaction:'—')+'</td>'
+        +'<td>'+(r.srd_satisfaction!=null?r.srd_satisfaction:'—')+'</td>'
+        +'<td>'+(r.brd_satisfaction!=null?r.brd_satisfaction:'—')+'</td>'
+        +'<td>'+(r.best_product||'—')+'</td>'
+        +'<td>'+(r.main_observation||'—')+'</td>'
+      +'</tr>';
+    }).join('');
+
+    content.innerHTML =
+      '<div class="stat-row">'
+        +'<div class="stat-card"><div class="stat-num">'+summary.total+'</div><div class="stat-label">Total Responses</div></div>'
+        +'<div class="stat-card"><div class="stat-num">'+(parseFloat(avg.ed_satisfaction_avg)||0).toFixed(1)+'</div><div class="stat-label">Electric Diffuser Avg</div></div>'
+        +'<div class="stat-card"><div class="stat-num">'+(parseFloat(avg.srd_satisfaction_avg)||0).toFixed(1)+'</div><div class="stat-label">Small Reed Avg</div></div>'
+        +'<div class="stat-card"><div class="stat-num">'+(parseFloat(avg.brd_satisfaction_avg)||0).toFixed(1)+'</div><div class="stat-label">Big Reed Avg</div></div>'
+      +'</div>'
+
+      +'<div class="section-h">Average Ratings by Product</div>'
+      +'<div class="product-grid">'
+        +productCard('Electric Diffuser', ['ed_noticeable','ed_spread','ed_inner_reach','ed_consistency','ed_coverage','ed_satisfaction'])
+        +productCard('Small Reed Diffuser', ['srd_noticeable','srd_spread','srd_strength_fit','srd_persistence','srd_satisfaction'])
+        +productCard('Big Reed Diffuser', ['brd_noticeable','brd_spread','brd_coverage','brd_strength_fit','brd_satisfaction'])
+      +'</div>'
+
+      +'<div class="section-h">General Feedback Breakdown</div>'
+      +'<div class="choice-grid">'
+        +choiceCard('Best Scent Diffusion', summary.best_product)
+        +choiceCard('Needs Improvement', summary.needs_improvement)
+        +choiceCard('Main Observation', summary.main_observation)
+      +'</div>'
+
+      +'<div class="section-h">Recent Responses (latest 100)</div>'
+      +'<div class="table-wrap"><table>'
+        +'<thead><tr><th>Date</th><th>Name</th><th>Area / Office</th><th>Electric Sat.</th><th>Small Reed Sat.</th><th>Big Reed Sat.</th><th>Best Product</th><th>Main Observation</th></tr></thead>'
+        +'<tbody>'+tableRows+'</tbody>'
+      +'</table></div>';
+
+  }catch(e){
+    content.innerHTML = '<div class="empty">Could not load dashboard. Please refresh.</div>';
+    console.error(e);
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
